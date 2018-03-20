@@ -1,1 +1,2 @@
 lib/credentials.py
+*.pyc
