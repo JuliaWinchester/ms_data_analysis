@@ -4,7 +4,7 @@ sys.path.append(os.path.abspath(os.path.join('..', '..', 'lib')))
 import db
 import ms_media_file
 
-conn = db.db_conn_socket()
+conn = db.db_conn()
 c = conn.cursor()
 
 sql = """ SELECT * FROM `ms_media_files` AS mf
