@@ -7,7 +7,8 @@ def db_conn():
 						   password = credentials.db['password'],
 						   db = credentials.db['db'],
 						   charset = 'utf8mb4',
-						   cursorclass=pymysql.cursors.DictCursor)
+						   cursorclass=pymysql.cursors.DictCursor,
+						   autocommit=True)
 
 def db_conn_socket():
 	return pymysql.connect(unix_socket = credentials.db['socket'],
@@ -15,10 +16,11 @@ def db_conn_socket():
 						   password = credentials.db['password'],
 						   db = credentials.db['db'],
 						   charset = 'utf8mb4',
-						   cursorclass=pymysql.cursors.DictCursor)
+						   cursorclass=pymysql.cursors.DictCursor,
+						   autocommit=True)
 
-def db_query(cursor, sql, args=None):
-	if args is not None:
+def db_execute(cursor, sql, args=None):
+	if args is not None and type(args) is not list and type(args) is not tuple:
 		args = [args]
 	cursor.execute(sql, args)
 	return cursor.fetchall()
