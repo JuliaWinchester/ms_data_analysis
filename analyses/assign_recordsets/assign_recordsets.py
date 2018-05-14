@@ -4,7 +4,7 @@ sys.path.append(os.path.abspath(os.path.join('..', '..', 'lib')))
 import db
 import requests
 
-conn = db.db_conn_socket()
+conn = db.db_conn()
 c = conn.cursor()
 
 sql = """ SELECT * FROM `ms_specimens` """
