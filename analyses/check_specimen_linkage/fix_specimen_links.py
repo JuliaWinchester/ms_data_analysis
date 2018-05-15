@@ -40,7 +40,7 @@ def fix_specimen_links():
 		])
 	#success_csv = pandas.read_csv('post_relink_success.csv')
 
-	specimen_csv = csv_df = pandas.read_csv('specimens_to_be_fixed.csv')
+	specimen_csv = pandas.read_csv('specimens_to_be_fixed.csv')
 
 	for index, row in specimen_csv.iterrows():
 		success_csv = pandas.read_csv('fix_success_summary.csv')
@@ -49,7 +49,7 @@ def fix_specimen_links():
 		print(row['specimen_id'])
 		if row['New_iDB_uuid']:
 			# Get MS specimen record
-			conn = db.db_conn_socket()
+			conn = db.db_conn()
 			c = conn.cursor()
 			sql = """
 				SELECT * FROM `ms_specimens` AS s
@@ -73,7 +73,7 @@ def fix_specimen_links():
 				print(get_json_field(item, ['indexTerms', 'genus']).lower())
 				print(spec_rec['genus'].lower())
 				# Taxa differ. Is there a MS taxon for the 'new' taxon?
-				conn = db.db_conn_socket()
+				conn = db.db_conn()
 				c = conn.cursor()
 				sql = """
 					SELECT * FROM `ms_taxonomy` AS t
@@ -97,7 +97,7 @@ def fix_specimen_links():
 					'''
 
 					# Get old taxon_id
-					conn = db.db_conn_socket()
+					conn = db.db_conn()
 					c = conn.cursor()
 					sql = """
 						SELECT * FROM `ms_specimens_x_taxonomy` 
@@ -112,7 +112,7 @@ def fix_specimen_links():
 						raise ValueError('More than one sxt for specimen_id ' + str(row['specimen_id']))
 
 					# delete old link
-					conn = db.db_conn_socket()
+					conn = db.db_conn()
 					c = conn.cursor()
 					sql = """
 						DELETE FROM `ms_specimens_x_taxonomy`
@@ -123,7 +123,7 @@ def fix_specimen_links():
 					# create new ms_taxonomy_record
 					taxon_vals = [int(spec_rec['project_id']), int(spec_rec['user_id']), int(time.time()), int(time.time())]
 
-					conn = db.db_conn_socket()
+					conn = db.db_conn()
 					c = conn.cursor()
 					sql = """
 						INSERT INTO `ms_taxonomy`
@@ -151,7 +151,7 @@ def fix_specimen_links():
 						get_json_field(item, ['indexTerms', 'genus']).capitalize()
 					]
 
-					conn = db.db_conn_socket()
+					conn = db.db_conn()
 					c = conn.cursor()
 					sql = """
 						INSERT INTO `ms_taxonomy_names`
@@ -164,7 +164,7 @@ def fix_specimen_links():
 					# create new sxt
 					new_alt_id = c.lastrowid
 
-					conn = db.db_conn_socket()
+					conn = db.db_conn()
 					c = conn.cursor()
 					sql = """
 						INSERT INTO `ms_specimens_x_taxonomy`
@@ -189,7 +189,7 @@ def fix_specimen_links():
 					'''
 
 					# Get old taxon_id
-					conn = db.db_conn_socket()
+					conn = db.db_conn()
 					c = conn.cursor()
 					sql = """
 						SELECT * FROM `ms_specimens_x_taxonomy` 
@@ -208,7 +208,7 @@ def fix_specimen_links():
 					new_alt_id = int(r[0]['alt_id'])
 
 					# Is there already an sxt for the new_taxon_id?
-					conn = db.db_conn_socket()
+					conn = db.db_conn()
 					c = conn.cursor()
 					sql = """
 						SELECT * FROM `ms_specimens_x_taxonomy`
@@ -220,7 +220,7 @@ def fix_specimen_links():
 						raise ValueError('Already existing link between taxon id ' + str(new_taxon_id) + ' and specimen_id ' + str(row['specimen_id']))
 					else:
 						#delete old sxt
-						conn = db.db_conn_socket()
+						conn = db.db_conn()
 						c = conn.cursor()
 						sql = """
 							DELETE FROM `ms_specimens_x_taxonomy`
@@ -229,7 +229,7 @@ def fix_specimen_links():
 						del_res = db.db_execute(c, sql, old_link_id)
 
 						#create new sxt
-						conn = db.db_conn_socket()
+						conn = db.db_conn()
 						c = conn.cursor()
 						sql = """
 							INSERT INTO `ms_specimens_x_taxonomy`
@@ -252,7 +252,7 @@ def fix_specimen_links():
 			new_recordset = get_json_field(item, ['indexTerms', 'recordset'])
 			val_array = [new_inst_code, new_coll_code, new_catalog_num, new_uuid, new_recordset, int(row['specimen_id'])]
 
-			conn = db.db_conn_socket()
+			conn = db.db_conn()
 			c = conn.cursor()
 			sql = """
 				UPDATE `ms_specimens`
