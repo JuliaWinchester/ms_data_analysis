@@ -43,12 +43,13 @@ def update_specimen_taxon():
 
 	for index, row in specimen_csv.iterrows():
 		success_csv = pandas.read_csv('update_taxon_success_summary.csv')
+		specimen_id = str(row['specimen_id'])
 		new_row = {}
 		new_taxon = 0
-		print(row['specimen_id'])
+		print(specimen_id)
 		
 		# Get MS specimen record
-		conn = db.db_conn()
+		conn = db.db_conn_socket()
 		c = conn.cursor()
 		sql = """
 			SELECT * FROM `ms_specimens` AS s
@@ -56,7 +57,7 @@ def update_specimen_taxon():
 			JOIN `ms_taxonomy_names` AS n ON n.alt_id = sxt.alt_id
 			WHERE s.specimen_id = %s
 			"""
-		spec_rec = db.db_execute(c, sql, row['specimen_id'])
+		spec_rec = db.db_execute(c, sql, specimen_id)
 		spec_rec = spec_rec[0]
 
 		# Get iDB specimen record for new UUID
@@ -72,7 +73,7 @@ def update_specimen_taxon():
 			print(get_json_field(item, ['indexTerms', 'genus']).lower())
 			print(spec_rec['genus'].lower())
 			# Taxa differ. Is there a MS taxon for the 'new' taxon?
-			conn = db.db_conn()
+			conn = db.db_conn_socket()
 			c = conn.cursor()
 			sql = """
 				SELECT * FROM `ms_taxonomy` AS t
@@ -96,22 +97,22 @@ def update_specimen_taxon():
 				'''
 
 				# Get old taxon_id
-				conn = db.db_conn()
+				conn = db.db_conn_socket()
 				c = conn.cursor()
 				sql = """
 					SELECT * FROM `ms_specimens_x_taxonomy` 
 					WHERE specimen_id = %s
 					"""
-				old_sxt = db.db_execute(c, sql, int(row['specimen_id']))
+				old_sxt = db.db_execute(c, sql, int(specimen_id))
 
 				if len(old_sxt) == 1:
 					old_taxon_id = old_sxt[0]['taxon_id']
 					old_link_id = old_sxt[0]['link_id']
 				else:
-					raise ValueError('More than one sxt for specimen_id ' + str(row['specimen_id']))
+					raise ValueError('More than one sxt for specimen_id ' + str(specimen_id))
 
 				# delete old link
-				conn = db.db_conn()
+				conn = db.db_conn_socket()
 				c = conn.cursor()
 				sql = """
 					DELETE FROM `ms_specimens_x_taxonomy`
@@ -122,7 +123,7 @@ def update_specimen_taxon():
 				# create new ms_taxonomy_record
 				taxon_vals = [int(spec_rec['project_id']), int(spec_rec['user_id']), int(time.time()), int(time.time())]
 
-				conn = db.db_conn()
+				conn = db.db_conn_socket()
 				c = conn.cursor()
 				sql = """
 					INSERT INTO `ms_taxonomy`
@@ -150,7 +151,7 @@ def update_specimen_taxon():
 					get_json_field(item, ['indexTerms', 'genus']).capitalize()
 				]
 
-				conn = db.db_conn()
+				conn = db.db_conn_socket()
 				c = conn.cursor()
 				sql = """
 					INSERT INTO `ms_taxonomy_names`
@@ -163,7 +164,7 @@ def update_specimen_taxon():
 				# create new sxt
 				new_alt_id = c.lastrowid
 
-				conn = db.db_conn()
+				conn = db.db_conn_socket()
 				c = conn.cursor()
 				sql = """
 					INSERT INTO `ms_specimens_x_taxonomy`
@@ -171,7 +172,7 @@ def update_specimen_taxon():
 					VALUES
 					(%s, %s, %s, %s)
 				"""
-				ins_res = db.db_execute(c, sql, [int(row['specimen_id']), int(new_taxon_id), int(new_alt_id), int(spec_rec['user_id'])])
+				ins_res = db.db_execute(c, sql, [int(specimen_id), int(new_taxon_id), int(new_alt_id), int(spec_rec['user_id'])])
 
 				success = 1
 				new_taxon = 1
@@ -189,38 +190,38 @@ def update_specimen_taxon():
 				'''
 
 				# Get old taxon_id
-				conn = db.db_conn()
+				conn = db.db_conn_socket()
 				c = conn.cursor()
 				sql = """
 					SELECT * FROM `ms_specimens_x_taxonomy` 
 					WHERE specimen_id = %s
 					"""
-				old_sxt = db.db_execute(c, sql, [row['specimen_id']])
+				old_sxt = db.db_execute(c, sql, [specimen_id])
 
 				if len(old_sxt) == 1:
 					old_taxon_id = int(old_sxt[0]['taxon_id'])
 					old_link_id = int(old_sxt[0]['link_id'])
 				else:
-					raise ValueError('More than one sxt for specimen_id ' + row['specimen_id'])
+					raise ValueError('More than one sxt for specimen_id ' + specimen_id)
 
 				# Get new taxon_id
 				new_taxon_id = int(r[0]['taxon_id'])
 				new_alt_id = int(r[0]['alt_id'])
 
 				# Is there already an sxt for the new_taxon_id?
-				conn = db.db_conn()
+				conn = db.db_conn_socket()
 				c = conn.cursor()
 				sql = """
 					SELECT * FROM `ms_specimens_x_taxonomy`
 					WHERE specimen_id = %s AND taxon_id = %s
 					"""
-				new_sxt = db.db_execute(c, sql, [int(row['specimen_id']), new_taxon_id])
+				new_sxt = db.db_execute(c, sql, [int(specimen_id), new_taxon_id])
 
 				if len(new_sxt) > 0:
-					raise ValueError('Already existing link between taxon id ' + str(new_taxon_id) + ' and specimen_id ' + str(row['specimen_id']))
+					raise ValueError('Already existing link between taxon id ' + str(new_taxon_id) + ' and specimen_id ' + str(specimen_id))
 				else:
 					#delete old sxt
-					conn = db.db_conn()
+					conn = db.db_conn_socket()
 					c = conn.cursor()
 					sql = """
 						DELETE FROM `ms_specimens_x_taxonomy`
@@ -229,7 +230,7 @@ def update_specimen_taxon():
 					del_res = db.db_execute(c, sql, old_link_id)
 
 					#create new sxt
-					conn = db.db_conn()
+					conn = db.db_conn_socket()
 					c = conn.cursor()
 					sql = """
 						INSERT INTO `ms_specimens_x_taxonomy`
@@ -237,7 +238,7 @@ def update_specimen_taxon():
 						VALUES
 						(%s, %s, %s, %s)
 					"""
-					ins_res = db.db_execute(c, sql, [int(row['specimen_id']), new_taxon_id, new_alt_id, int(spec_rec['user_id'])])
+					ins_res = db.db_execute(c, sql, [int(specimen_id), new_taxon_id, new_alt_id, int(spec_rec['user_id'])])
 
 					success = 1
 					new_taxon = 1
@@ -245,9 +246,9 @@ def update_specimen_taxon():
 				raise ValueError(str(len(r)) + ' MS taxon records for specimen uuid ' + str(row['New_iDB_uuid']))
 		else:
 			success = 0
-			warnings.warn('Genera do not differ for specimen ' + str(row['specimen_id']) + ', skipping')
+			warnings.warn('Genera do not differ for specimen ' + str(specimen_id) + ', skipping')
 
-		new_row['specimen_id'] = row['specimen_id']
+		new_specimen_id = int(specimen_id)
 		new_row['success'] = success
 		new_row['new_taxon'] = new_taxon
 		
