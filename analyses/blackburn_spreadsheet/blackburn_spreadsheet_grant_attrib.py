@@ -13,7 +13,7 @@ for index, row in csv.iterrows():
 	if type(ms_code) is str and ms_code and type(grant_attrib) is str and grant_attrib:
 		print(ms_code)
 		print(grant_attrib)
-		conn = db.db_conn_socket()
+		conn = db.db_conn()
 		c = conn.cursor()
 		sql = """ 
 			UPDATE `ms_media`
