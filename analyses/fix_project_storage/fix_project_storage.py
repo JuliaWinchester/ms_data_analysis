@@ -44,22 +44,20 @@ for row in r:
 	if row['project_id'] not in result:
 		result[row['project_id']] = []
 	m = ms_media_file.MsMediaFile(row)
-	if hasattr(m, 'mf_info_dict'):
-		if '_archive_' in m.mf_info_dict:
-			result[row['project_id']].append(m.mf_info_dict['_archive_']['FILESIZE'])
-		elif 'original' in m.mf_info_dict:
-			if 'PROPERTIES' in m.mf_info_dict['original']:
-				if 'filesize' in m.mf_info_dict['original']['PROPERTIES']:
-					result[row['project_id']].append(m.mf_info_dict['original']['PROPERTIES']['filesize'])
-				else:
-					print(str(i))
-					print('No filesize for file ' + m.mf_info_dict['original']['FILENAME'])
-			else:
-				print(str(i))
-				print('No properties for file ' + m.mf_info_dict['original']['FILENAME'])
-		else:
-			print(str(i))
-			print('No original or archive found for media file id ' + str(m.db_dict['media_file_id']))
+	storage = 0
+	if hasattr(m, 'mf_info_dict') and type(m.mf_info_dict) == dict:
+		for key, val in m.mf_info_dict.iteritems():
+			if key == '_archive_' and val is not None and 'FILESIZE' in val:
+				storage += int(val['FILESIZE'])
+				# print('Adding value' + str(int(val['FILESIZE'])) + ' to storage')
+			elif val is not None and 'PROPERTIES' in val and 'filesize' in val['PROPERTIES']:
+				storage += int(val['PROPERTIES']['filesize'])
+				# print('Adding value' + str(int(val['PROPERTIES']['filesize'])) + ' to storage')
+	if storage > 0:
+		result[row['project_id']].append(storage)
+		# print('Appending value ' + str(storage) + ' to media ' + str(m.db_dict['media_file_id']))
+	else:
+		print('No filesize for file ' + m.db_dict['media_file_id'])
 	i += 1
 
 for project_id, file_size_array in result.iteritems():
