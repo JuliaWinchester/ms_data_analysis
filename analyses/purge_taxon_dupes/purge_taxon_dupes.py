@@ -20,7 +20,7 @@ def db_conn():
 						   autocommit=True)
 
 def db_query(cursor, sql, args=None):
-	if args is not None and (type(args) != list or type(args) != tuple):
+	if args is not None and type(args) != list and type(args) != tuple:
 		args = [args]
 	cursor.execute(sql, args)
 	return cursor.fetchall()
