@@ -105,7 +105,7 @@ for g_name, g_dict in td.iteritems():
 				s = db_query(c, specimen_sql, int(alt_id))
 				td_copy[g_name][s_name][ss_name][alt_id]['n_specimens'] = len(s)
 
-Fix shit
+# Fix shit
 for g_name, g_dict in td_copy.iteritems():
 	if g_name:
 		for s_name, s_dict in g_dict.iteritems():
