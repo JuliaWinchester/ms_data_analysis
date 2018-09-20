@@ -125,6 +125,7 @@ for g_name, g_dict in td_copy.iteritems():
 				if top_alt_id != alt_id:
 					# Fix this one
 					print(str(g_name) + ' ' + str(s_name) + ' ' + str(ss_name) + ' Will fold alt_id ' + str(alt_id) + ' with ' + str(name_dict['n_specimens']) + ' into alt_id ' + str(top_alt_id) + ' with ' + str(top_n_specimens) + ' specimens')
+					relink_taxonomy(c, alt_id, name_dict['taxon_id'], top_alt_id, top_taxon_id)
 
 
 
