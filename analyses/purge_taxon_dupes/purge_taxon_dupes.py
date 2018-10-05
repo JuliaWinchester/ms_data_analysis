@@ -73,6 +73,11 @@ for row in r:
 	td[row['genus']][row['species']][row['subspecies']][row['alt_id']] = {
 		'alt_id': row['alt_id'],
 		'taxon_id': row['taxon_id'],
+		'ht_family': row['ht_family'],
+		'ht_order': row['ht_order'],
+		'ht_class': row['ht_class'],
+		'ht_phylum': row['ht_phylum'],
+		'ht_kingdom': row['ht_kingdom'],
 		'n_specimens': 0
 	}
 
@@ -107,9 +112,7 @@ for g_name, g_dict in td.iteritems():
 
 # Fix shit
 for g_name, g_dict in td_copy.iteritems():
-	if g_name:
 		for s_name, s_dict in g_dict.iteritems():
-			if s_name:
 				for ss_name, ss_dict in s_dict.iteritems():
 					top_alt_id = None
 					top_taxon_id = None
@@ -149,6 +152,14 @@ for g_name, g_dict in td_copy.iteritems():
 						if top_alt_id != alt_id:
 							# Fix this one
 							print(str(g_name) + ' ' + str(s_name) + ' ' + str(ss_name) + ' Will fold alt_id ' + str(alt_id) + ' with ' + str(name_dict['n_specimens']) + ' into alt_id ' + str(top_alt_id) + ' with ' + str(top_n_specimens) + ' specimens')
+							print(g_name)
+							print(s_name)
+							print(ss_name)
+							print(name_dict['ht_family'])
+							print(name_dict['ht_order'])
+							print(name_dict['ht_class'])
+							print(name_dict['ht_phylum'])
+							print(name_dict['ht_kingdom'])
 							# relink_taxonomy(c, alt_id, name_dict['taxon_id'], top_alt_id, top_taxon_id)
 
 
